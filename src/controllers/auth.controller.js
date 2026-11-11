@@ -16,14 +16,8 @@ export async function login(req, res, next) {
     }
 }
 
-export async function getMe(req, res, next) {
-    try {
-        const member = await authService.getCurrentMember(req.session.memberId);
-
-        return res.status(200).json({id: member.id, name: member.name, role: member.role});
-    } catch (error) {
-        next(error);
-    }
+export function getMe(req, res) {
+    return res.status(200).json(req.user);
 }
 
 export async function logout(req, res, next) {

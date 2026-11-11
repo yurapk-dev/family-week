@@ -1,4 +1,4 @@
-﻿import {readFile} from 'node:fs/promises';
+import {readFile} from 'node:fs/promises';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
@@ -49,7 +49,7 @@ const seedMembers = async () => {
 
     for (const member of members) {
         const login = member.login.trim().toLowerCase();
-        const existingMember = await Member.findOne({login}).exec();
+        const existingMember = await Member.findOne({ login }).exec();
 
         if (existingMember) {
             skipped++;
@@ -58,14 +58,13 @@ const seedMembers = async () => {
 
         const passwordHash = await bcrypt.hash(member.password, 12);
 
-        const memberAccount = new Member({
+        await Member.create({
             name: member.name,
             login,
             passwordHash,
             role: member.role,
         });
 
-        await memberAccount.save();
         created++;
     }
 

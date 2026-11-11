@@ -5,16 +5,18 @@ if (!process.env.SESSION_SECRET) {
     throw new Error('Не задан SESSION_SECRET');
 }
 
+export const sessionStore = MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'sessions',
+});
+
 export const sessionMiddleware = session({
     name: 'connect.sid',
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
 
-    store: MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI,
-        collectionName: 'sessions',
-    }),
+    store: sessionStore,
 
     cookie: {
         httpOnly: true,

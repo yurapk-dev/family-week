@@ -1,8 +1,9 @@
-﻿import bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 import Member from '../models/member.model.js';
+import * as memberRepository from '../repositories/member.repository.js';
 
 export async function login(login, password) {
-    const member = await Member.findOne({ login }).select('+passwordHash');
+    const member = await Member.findOne({ login }).select('+passwordHash').exec();
     const validPassword = member && await bcrypt.compare(password, member.passwordHash);
 
     if (!validPassword) {
@@ -20,8 +21,7 @@ export async function login(login, password) {
 
 
 export async function getCurrentMember(memberId) {
-    const member = await Member.findById(memberId)
-        .select('name role');
+    const member = await memberRepository.findById(memberId);
 
     if (!member) {
         const error = new Error('Необходимо войти в систему');
