@@ -1,4 +1,4 @@
-﻿import { isCalendarDate, isValidDateRange } from '../utils/dates.js';
+﻿import {isCalendarDate, isValidDateRange} from '../utils/dates.js';
 
 export function validateLogin(req, res, next) {
     const body = req.body;
@@ -38,7 +38,7 @@ export function validateLogin(req, res, next) {
 }
 
 export function validateTaskDateRange(req, res, next) {
-    const { from, to } = req.query;
+    const {from, to} = req.query;
     const fields = {};
 
     if (!isCalendarDate(from)) {
@@ -112,4 +112,61 @@ export function validateCreateTask(req, res, next) {
     next();
 }
 
+export function validateUpdateTask(req, res, next) {
+    const body = req.body;
 
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+        const error = new Error('Тело запроса должно быть JSON-объектом');
+        error.status = 400;
+        error.code = 'VALIDATION_ERROR';
+        return next(error);
+    }
+    const allowedFields = ['title', 'date', 'assigneeId'];
+    const fields = {};
+    if (!/^[a-fA-F0-9]{24}$/.test(req.params.id)) fields.id = 'Укажите корректный ID дела';
+    if (!Object.keys(body).length) fields.body = 'Укажите хотя бы одно поле для изменения';
+    if (Object.keys(body).some(field => !allowedFields.includes(field))) fields.body = 'Допустимы только поля title, date и assigneeId';
+
+    if (body.title !== undefined
+        && (
+            typeof body.title !== 'string'
+            || !body.title.trim()
+            || body.title.trim().length > 120
+        )
+    ) {
+        fields.title = 'Укажите название от 1 до 120 символов';
+    }
+    if (body.date !== undefined && !isCalendarDate(body.date)) fields.date = 'Укажите существующую дату в формате YYYY-MM-DD';
+
+    if (body.assigneeId !== undefined
+        && (
+            typeof body.assigneeId !== 'string'
+            || !/^[a-fA-F0-9]{24}$/.test(body.assigneeId)
+        )
+    ) {
+        fields.assigneeId = 'Укажите корректный ID участника';
+    }
+    if (Object.keys(fields).length) {
+        const error = new Error('Проверьте данные');
+        error.status = 400;
+        error.code = 'VALIDATION_ERROR';
+        error.fields = fields;
+        return next(error);
+    }
+    if (body.title !== undefined) req.body.title = body.title.trim();
+
+    next();
+}
+export function validateTaskId(req, res, next) {
+    if (!/^[a-fA-F0-9]{24}$/.test(req.params.id)) {
+        const error = new Error('Проверьте данные');
+        error.status = 400;
+        error.code = 'VALIDATION_ERROR';
+        error.fields = {
+            id: 'Укажите корректный ID дела',
+        };
+        return next(error);
+    }
+
+    next();
+}

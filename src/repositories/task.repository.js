@@ -16,3 +16,18 @@ export async function createTask({ title, date, assigneeId }) {
         assigneeId,
     });
 }
+export async function findById(id) {
+    return Task.findById(id).exec();
+}
+
+export async function updateById(id, changes) {
+    return Task.findByIdAndUpdate(
+        id, { $set: changes },
+        {
+            returnDocument: 'after',
+            runValidators: true,
+        }).exec();
+}
+export async function deleteById(id) {
+    return Task.findByIdAndDelete(id).exec();
+}
